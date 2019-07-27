@@ -3,9 +3,9 @@
   {{- .page_scratch.Add "js" (dict "file" "syna-hero.js") -}}
 {{- end -}}
 {{- $bg := .self.Scratch.Get "bg" }}
-
 {{ "<!-- Hero -->" | safeHTML }}
 <header id="{{ .Name }}" class="fragment hero">
+
   {{- if .Params.header }}
     <div
       style="background-image:url({{ partial "helpers/image.html" (dict "root" $self "asset" .Params.header) }})"
@@ -99,4 +99,37 @@
     selector: "{{ printf "%s-particles-js" .Name }}",
     config: {{ if fileExists $file_path -}} JSON.parse({{ readFile $file_path | safeHTML }}) {{- else -}} null {{- end -}},
   });
+</script>
+
+
+<script src="/js/jquery-3.4.1.slim.min.js"></script>
+
+<script>
+
+  isBlinking = false;
+
+  function getNextBlinkTime() {
+    var min=3000;
+    var max=4000;
+
+    return random = Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  async function blink() {
+    if(isBlinking) {
+      isBlinking = false;
+      $("img[src^='/images/ninja']").attr('src', "/images/ninja-calling-cq.png");
+
+      setTimeout(blink, getNextBlinkTime());
+
+
+    } else {
+      isBlinking = true;
+      $("img[src^='/images/ninja']").attr('src', "/images/ninja-calling-cq-blink.png");
+      setTimeout(blink, 100);
+    }
+
+  }
+
+  setTimeout(blink, 2000);
 </script>
