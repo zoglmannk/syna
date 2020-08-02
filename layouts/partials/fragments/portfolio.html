@@ -1,9 +1,10 @@
+{{- $items := partial "helpers/subitems.html" . -}}
+
 {{- $self := . -}}
-{{- $items := where (.page.Resources.Match (printf "%s/*.md" .Name)) ".Name" "ne" .self.Name -}}
 {{- .page_scratch.Add "js" (dict "file" "syna-portfolio.js") -}}
 {{- $bg := .self.Scratch.Get "bg" }}
 
-{{- partial "helpers/container.html" (dict "start" true "in_slot" .in_slot "bg" $bg "Name" .Name "Params" .Params) -}}
+{{- partial "helpers/container.html" (dict "start" true "in_slot" .in_slot "bg" $bg "id" .id "Params" .Params) -}}
   {{- partial "helpers/section-header.html" (dict "self" $self.self "bg" $bg "params" .Params) }}
   <div class="row justify-content-center">
     {{- if eq (len $items) 0 }}
@@ -14,6 +15,11 @@
           <div
             class="border rounded position-relative portfolio-item overflow-hidden 
               {{- if not .Params.item_url }} has-modal {{- end -}}
+              {{- with .Params.background -}}
+                {{- if .image -}}
+                  {{- print " has-background" -}}
+                {{- end -}}
+              {{- end -}}
             "
             {{- if $self.Params.height -}}
               {{- safeHTMLAttr (printf "style='min-height:%s; height:%s'" $self.Params.height $self.Params.height) -}}
@@ -21,9 +27,22 @@
             {{- if .Params.item_url }}
               <a href="{{ .Params.item_url | relLangURL }}">
             {{- end }}
-                {{- if .Params.asset -}}
-                  <img src="{{ partial "helpers/image.html" (dict "root" $self "asset" .Params.asset "resize" "500x380") }}" class="img-fluid" alt="{{ .Params.asset.text }}">
-                {{- end }}
+                {{- $this := . -}}
+                {{- with .Params.background -}}
+                  {{- if .image -}}
+                    <img src="{{ partial "helpers/image.html" (dict "root" $self "this" $this "asset" . "resize" "500x380") }}" class="portfolio-background img-fluid" alt="{{ .text }}">
+                  {{- end -}}
+                {{- end -}}
+                {{- with .Params.asset -}}
+                  {{- if .image -}}
+                    <img src="{{ partial "helpers/image.html" (dict "root" $self "this" $this "asset" . "resize" "500x380") }}" class="portfolio-image img-fluid" alt="{{ .text }}">
+                  {{- else if .icon }}
+                    <span class="portfolio-icon fa-stack fa-3x m-2" title="{{ .text }}">
+                      <i class="{{ .icon }} fa-stack-2x fa-inverse"></i>
+                      <span class="sr-only">{{ .text }}</span>
+                    </span>
+                  {{- end -}}
+                {{- end -}}
                 <div class="position-absolute hover-overlay"></div>
                 {{- if .Params.labels -}}
                   <div class="position-absolute text-light badge-container">

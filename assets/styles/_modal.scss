@@ -35,6 +35,26 @@ body.modal-open {
     }
   }
 
+  .modal-background {
+    position: relative;
+    min-height: 180px;
+
+    .modal-asset-image, .modal-asset-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .icon-container {
+      font-size: 64px;
+
+      .fa-stack-1x, .fa-stack-2x {
+        position: relative;
+      }
+    }
+  }
+
   .badge-container {
     color: $light;
     margin-bottom: 1rem;

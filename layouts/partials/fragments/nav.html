@@ -54,16 +54,33 @@
         {{- end }}
         {{- if .Site.Menus.main -}}
           {{- range sort .Site.Menus.main }}
-            {{- $isMenuCurrent := or (eq $.root.Permalink .URL) (eq (printf "%s/" $.root.Permalink) .URL) (eq $.root.Permalink (printf "%s/" .URL)) -}}
-            <li class="nav-item">
-              <a href="{{ .URL | relLangURL }}"
+            {{- $isMenuCurrent := or ($.root.HasMenuCurrent "main" .) (eq $.root.Permalink .URL) (eq (printf "%s/" $.root.Permalink) .URL) (eq $.root.Permalink (printf "%s/" .URL)) -}}
+            <li class="nav-item {{ if .HasChildren }}dropdown{{ end }}">
+              <a
                 {{- if hasPrefix .URL "#" }}
                   class="nav-link anchor"
                 {{- else }}
-                  class="nav-link {{- if $isMenuCurrent }} active default-active {{- end -}}"
-                {{- end }}>
+                  class="nav-link {{- if $isMenuCurrent }} active default-active {{- end -}} {{ if .HasChildren }} dropdown-toggle{{ end }}"
+                {{- end }}
+                {{if .HasChildren}}
+                  id="navbarDropdown"
+                  role="button"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  href="#"
+                {{ else }}
+                  href="{{ .URL | relLangURL }}"
+                {{ end }}>
                 {{ .Name }}
               </a>
+              {{ if .HasChildren }}
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {{ range .Children }}
+                  <a class="dropdown-item {{ if $.root.IsMenuCurrent "main" . }}active{{ end }}" href="{{ .URL }}">{{ .Name }}</a>
+                {{ end }}
+              </div>
+              {{ end }}
             </li>
           {{- end -}}
         {{- end }}
@@ -113,7 +130,7 @@
     <div class="d-none d-lg-block pl-auto">
       <a class="btn btn-light ignore-color-change" href="{{ .url }}" role="button" title="{{- i18n "navbar.github" | default "Github" -}}">
         <i class="{{ printf "%s" .icon | default (printf "fab fa-github") }} mr-2"></i>
-        {{ .text | default "Star" }}
+        {{ .text | default (i18n "github.star") }}
       </a>
     </div>
   {{- end }}
@@ -139,9 +156,9 @@
     {{- $page_scratch.Set "crumb_tmp" $.page -}}
   {{- else if ge $index 1 -}}
     {{- $directory := (delimit (first (add $index 1) $sections) "/") -}}
-    {{- $page_scratch.Set "crumb_tmp" ($.root.Site.GetPage "page" (print $directory)) -}}
+    {{- $page_scratch.Set "crumb_tmp" ($.root.Site.GetPage "page" (print (strings.TrimPrefix "/" $directory))) -}}
   {{- else -}}
-    {{- $page_scratch.Set "crumb_tmp" ($.root.Site.GetPage "section" (print $directory)) -}}
+    {{- $page_scratch.Set "crumb_tmp" ($.root.Site.GetPage "section" (print (strings.TrimPrefix "/" $directory))) -}}
   {{- end -}}
   {{- if ($page_scratch.Get "crumb_tmp") -}}
     {{- $page_scratch.Add "crumbs" ($page_scratch.Get "crumb_tmp") -}}
@@ -151,14 +168,14 @@
   * Render the breadcrumb
   */}}
 {{- if and $display_breadcrumb (lt $level (len ($page_scratch.Get "crumbs"))) }}
-  <nav aria-label="breadcrumb" class="overlay navbar navbar-expand-lg pt-2
+  <nav aria-label="breadcrumb" class="overlay navbar breadcrumb-container navbar-expand-lg pt-2
     {{- printf " bg-%s" $nav_bg -}}
     {{- if or (eq $bg "light") (eq $bg "white") (eq $bg "secondary") -}}
       {{- printf " navbar-%s" "light" -}}
     {{- else -}}
       {{- printf " navbar-%s" "dark" -}}
     {{- end -}}
-  " id="{{ .Name }}">
+  " id="{{ .Name }}-breadcrumb">
     <div class="container">
       <ol class="breadcrumb mb-0 py-1">
         {{- $item_count := sub (len ($page_scratch.Get "crumbs")) $level -}}
@@ -198,29 +215,38 @@
 {{- if .Params.search }}
 {{ partial "helpers/search-result-template.html" (dict "self" $self "name" .Name "message_class" "p-2" "background" $bg) }}
 <script>
-  var fragmentName = "{{ .Name }}";
-  window.syna.api.register('search', 'search-' + fragmentName, {
-    searchInput: '#search-query-{{ .Name }}',
-    resultsContainer: '#search-results-{{ .Name }}',
-    template: '#search-result-template-{{ .Name }}',
-    noResults: '#search-no-results-template-{{ .Name }}',
-    empty: '#search-empty-template-{{ .Name }}',
-  });
+  (function() {
+    var fragmentName = "{{ .Name }}";
+    window.syna.api.register('search', 'search-' + fragmentName, {
+      searchInput: `#search-query-${fragmentName}`,
+      resultsContainer: `#search-results-${fragmentName}`,
+      template: `#search-result-template-${fragmentName}`,
+      noResults: `#search-no-results-template-${fragmentName}`,
+      empty: `#search-empty-template-${fragmentName}`,
+    });
 
-  var resultsContainer = document.querySelector('.search-results-container');
-  document.querySelector('#search-query-{{ .Name }}').addEventListener('input', function(e) {
-    if (e.target.value.length) {
-      resultsContainer.classList.add('show');
-    } else {
-      resultsContainer.classList.remove('show');
-    }
-  });
+    var resultsContainer = document.querySelector(`#${fragmentName} .search-results-container`)
+    document.querySelector(`#search-query-${fragmentName}`).addEventListener('input', function(e) {
+      if (e.target.value.length) {
+        resultsContainer.classList.add('show');
+      } else {
+        resultsContainer.classList.remove('show');
+      }
+    });
 
-  document.addEventListener('click', function(e) {
-    if (!document.querySelector('.search-container').contains(e.target)) {
-      document.querySelector('#search-query-{{ .Name }}').value = '';
-      resultsContainer.classList.remove('show');
-    }
-  });
+    document.addEventListener('click', function(e) {
+      if (!document.querySelector(`#${fragmentName} .search-container`).contains(e.target)) {
+        document.querySelector(`#search-query-${fragmentName}`).value = '';
+        resultsContainer.classList.remove('show');
+      }
+    });
+  })();
 </script>
+{{- end -}}
+{{- if .Params.sticky }}
+<style>
+  :root {
+    --header-height: 56px;
+  }
+</style>
 {{- end -}}
