@@ -21,13 +21,14 @@ Contributions for translations are welcome.
 ### Events
 
 <!-- TODO: revise later -->
-This fragment uses the [Events](/docs/events) api by default.
+This fragment uses the [Events]({{< ref "docs/events" >}}) api by default.
 
 #### Subscribers
 
 ##### contact:update
 
-This event is not published by any fragment by default. But you can make use of it through [event urls](/docs/events/#event-urls).
+This event is not published by any fragment by default. But you can make use of
+it through [event urls]({{< ref "docs/events" >}}#event-urls).
 
 ###### name
 *type: string*
@@ -168,4 +169,33 @@ Any other value for the `name` variable in the `fields.hidden` object will have 
 
 Value of the hidden field. This field will be overridden if `name` is set to `site` or `page`.
 
-[Global variables](/docs/global-variables) are documented as well and have been omitted from this page.
+[Global variables]({{< ref "global-variables" >}}) are documented as well and have been omitted from this page.
+
+#### fields.custom
+*type: array of objects*
+
+This array is used to define custom inputs. These inputs are displayed in addition to the default inputs of the contact form.
+
+##### fields.custom.name
+*type: string*
+
+##### fields.custom.text
+*type: string*
+
+##### fields.custom.error
+*type: string*  
+*default: i18n contact.defaultError*
+
+##### fields.custom.required
+*type: boolean*
+
+##### fields.custom.validation
+*type: boolean, string*  
+*accepted values: email, regex*
+
+Applies validation rules to the input. If not set or set to false, no validation will be applied.
+
+##### fields.custom.validation_regex
+*type: string*
+
+In case `fields.custom.validation` is set to `regex`, you can specify the regex here.

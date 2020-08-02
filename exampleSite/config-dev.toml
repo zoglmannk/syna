@@ -1,13 +1,16 @@
 # Site settings
 baseurl = "/"
 languageCode = "en-us"
-languageLang = "en"
+defaultContentLanguage = "en"
 title = "Okkur - Syna"
 theme = "syna"
 themesDir = "../.."
 enableGitInfo = true
-version = "0.15.0"
+version = "0.17.3"
 disableKinds = ["RSS", "taxonomy", "taxonomyTerm"]
+
+RelativeURLs = true
+CanonifyURLs = true
 
 # Google Analytics tracking
 googleAnalytics = ""
@@ -18,6 +21,11 @@ googleAnalytics = ""
 [frontmatter]
 date = ["date", "lastmod"]
 lastmod = ["lastmod", ":git", "date"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+     unsafe = true
 
 [params]
   name = "Okkur Labs"
@@ -81,6 +89,36 @@ lastmod = ["lastmod", ":git", "date"]
   weight = 30
 
 [[menu.main]]
+  url = "/dev"
+  name = "Dev Section"
+  weight = 35
+  identifier = "dev"
+
+[[menu.main]]
+  url = "/dev"
+  name = "Dev Section"
+  weight = 10
+  parent = "dev"
+
+[[menu.main]]
+  url = "/dev/colors"
+  name = "Colors"
+  weight = 20
+  parent = "dev"
+
+[[menu.main]]
+  url = "/dev/blog"
+  name = "Blog"
+  weight = 30
+  parent = "dev"
+
+[[menu.main]]
+  url = "/dev/events"
+  name = "Events"
+  weight = 40
+  parent = "dev"
+
+[[menu.main]]
   url = "/about"
   name = "About"
   weight = 40
@@ -98,7 +136,7 @@ lastmod = ["lastmod", ":git", "date"]
 [[menu.footer_social]]
   weight = 30
   name = "github"
-  url = "https://syna.okkur.org/code"
+  url = "https://git.okkur.org/syna"
   pre = "fab fa-github fa-stack-2x"
 
 [[menu.copyright_footer]]

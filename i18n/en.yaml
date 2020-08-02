@@ -3,12 +3,18 @@
   translation: "Website based on"
 - id: en
   translation: "English"
+- id: github.star
+  translation: "Star"
+- id: github.stars
+  translation: "Stars"
 
 # Content
 - id: content.readmore
   translation: "Read more..."
 
 # Contact Form
+- id: contact.defaultError
+  translation: 'Please fill the field'
 - id: contact.defaultNameError
   translation: "Please enter your name"
 - id: contact.defaultEmailError
@@ -61,6 +67,8 @@
 # Search
 - id: search.search
   translation: "Search"
+- id: search.no_results
+  translation: "No matches found"  
 
 # Stripe
 - id: stripe.pay

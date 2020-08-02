@@ -7,7 +7,7 @@
 
 {{ "<!-- Contact -->" | safeHTML }}
 
-{{- partial "helpers/container.html" (dict "start" true "in_slot" .in_slot "bg" $bg "Name" .Name "Params" .Params) -}}
+{{- partial "helpers/container.html" (dict "start" true "in_slot" .in_slot "bg" $bg "id" .id "Params" .Params) -}}
   {{- partial "helpers/section-header.html" (dict "self" $self "bg" $bg "params" .Params) }}
   <div class="row">
     <div class="col-12">
@@ -20,6 +20,9 @@
           {{- safeHTMLAttr (print " data-has-netlify=\"true\" netlify") -}}
         {{- else -}}
           {{- safeHTMLAttr (printf " action=\"%s\"" (.Params.post_url | default (printf "https://formspree.io/%s" .Params.email))) -}}
+        {{- end -}}
+        {{- if and (isset .Params "email") -}}
+          {{- safeHTMLAttr (print " data-has-formspree=\"true\"") -}}
         {{- end }}>
           <div class="row py-3 should-fade">
             <div class="col-md-6">
@@ -63,6 +66,45 @@
                     data-validation-error-msg="{{ .error | default (i18n "contact.defaultPhoneError") }}"
                     placeholder="{{ with .text }}{{ . | markdownify }}{{ end }}">
                   <div class="px-2" data-error id="phone-error"></div>
+                </div>
+              {{- end }}
+              {{- range (.Params.fields.custom | default slice) }}
+                {{- $field := . }}
+                <div class="form-group">
+                  <input
+                    id="{{- print .name -}}"
+                    name="{{- print .name -}}"
+                    class="form-control"
+                    type="text"
+
+                    {{- if eq .name "name" }}
+                      {{ safeHTMLAttr "data-validation" }}
+                    {{- else if eq .name "email" }}
+                      {{ safeHTMLAttr "data-validation='email'" }}
+                    {{- else if eq .name "phone" }}
+                      {{ safeHTMLAttr "data-validation=regex'" }}
+                      {{ safeHTMLAttr "data-validation-regex='^([0-9,\\+]+)$'" }}
+                    {{- end -}}
+
+                    {{- with .validation -}}
+                      {{- if eq . true }}
+                        {{ safeHTMLAttr "data-validation" }}
+                      {{- else }}
+                        {{ safeHTMLAttr (printf "data-validation='%s'" .) }}
+                      {{- end -}}
+
+                      {{- with $field.validation_regex }}
+                        {{ safeHTMLAttr (printf "data-validation-regex='%s'" .) }}
+                      {{- end -}}
+                    {{- end -}}
+
+                    {{- if .required }}
+                      {{ safeHTMLAttr "required" }}
+                    {{- end }}
+
+                    data-validation-error-msg="{{ .error | default (i18n (printf "contact.defaultError" .name)) }}"
+                    placeholder="{{ with .text }}{{ . | markdownify }}{{ end }}">
+                  <div class="px-2" data-error id="{{- printf "%s-error" .name -}}"></div>
                 </div>
               {{- end }}
             </div>
